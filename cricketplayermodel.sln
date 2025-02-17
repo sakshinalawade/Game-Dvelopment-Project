@@ -1,26 +1,69 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{79964DAC-BDE7-8549-8261-149B467CB8BB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{7A51D74F-3DDD-FA06-62F9-5B904877DD73}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{79964DAC-BDE7-8549-8261-149B467CB8BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{79964DAC-BDE7-8549-8261-149B467CB8BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{79964DAC-BDE7-8549-8261-149B467CB8BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{79964DAC-BDE7-8549-8261-149B467CB8BB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7A51D74F-3DDD-FA06-62F9-5B904877DD73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7A51D74F-3DDD-FA06-62F9-5B904877DD73}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7A51D74F-3DDD-FA06-62F9-5B904877DD73}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7A51D74F-3DDD-FA06-62F9-5B904877DD73}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
+using UnityEngine;
+
+public class BowlingAnimationController : MonoBehaviour
+{
+    // Reference to the body parts (already assigned from CreateCricketCharacter)
+    public Transform rightArm;
+    public Transform leftArm;
+    public Transform body;
+    public Transform leftLeg;
+    public Transform rightLeg;
+
+    // Duration for the bowling action
+    public float animationDuration = 2.0f;
+    private float timer = 0f;
+
+    // To control the animation states (isBowling flag)
+    private bool isBowling = false;
+
+    void Update()
+    {
+        // Check for bowling input (e.g., pressing 'B' to trigger bowling)
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            isBowling = true;
+            timer = 0f;  // Reset the timer when starting bowling
+        }
+
+        // Perform bowling animation if triggered
+        if (isBowling)
+        {
+            AnimateBowling();
+        }
+    }
+
+    // Function to animate the bowling action
+    void AnimateBowling()
+    {
+        // Increment timer
+        timer += Time.deltaTime;
+
+        // Normalize the timer to control the animation speed (0 to 1)
+        float progress = timer / animationDuration;
+
+        // If the animation duration is reached, stop animating
+        if (progress >= 1f)
+        {
+            isBowling = false;
+            progress = 1f;  // Ensure progress is clamped to 1
+        }
+
+        // Raise the arm (right arm)
+        float armRaise = Mathf.Lerp(0f, 90f, progress);  // Lerp between 0 and 90 degrees
+        rightArm.localRotation = Quaternion.Euler(armRaise, 0f, 0f); // Rotate arm around the X-axis
+
+        // Bend the body forward (rotation around X-axis)
+        float bodyBend = Mathf.Lerp(0f, -45f, progress);  // Lerp between 0 and -45 degrees
+        body.localRotation = Quaternion.Euler(bodyBend, 0f, 0f); // Rotate body forward
+
+        // Move the legs forward (translation along Z-axis)
+        float legMovement = Mathf.Lerp(0f, 1f, progress);  // Lerp between 0 and 1 unit forward
+        leftLeg.localPosition = new Vector3(-0.3f, 0.6f, legMovement);
+        rightLeg.localPosition = new Vector3(0.3f, 0.6f, legMovement);
+
+        // Optionally, rotate the legs to simulate walking
+        float legRotation = Mathf.Lerp(0f, 15f, progress);  // Rotate legs slightly
+        leftLeg.localRotation = Quaternion.Euler(0f, 0f, legRotation);
+        rightLeg.localRotation = Quaternion.Euler(0f, 0f, -legRotation); // Opposite direction for right leg
+    }
+}
